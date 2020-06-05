@@ -1,179 +1,187 @@
-## Лабораторная работа  
+## Laboratory work III
 
-Данная лабораторная работа посвещена изучению систем контроля версий на примере **Git**.
+Данная лабораторная работа посвещена изучению систем автоматизации сборки проекта на примере **CMake**
 
-```bash
-$ open https://git-scm.com
+```sh
+$ open https://cmake.org/
 ```
 
 ## Tasks
 
-- [x] 1. Создать публичный репозиторий с названием **lab02** и с лиценцией **MIT**
-- [x] 2. Сгенирировать токен для доступа к сервису **GitHub** с правами **repo**
-- [x] 3. Ознакомиться со ссылками учебного материала
-- [x] 4. Выполнить инструкцию учебного материала
+- [x] 1. Создать публичный репозиторий с названием **lab03** на сервисе **GitHub**
+- [x] 2. Ознакомиться со ссылками учебного материала
+- [x] 3. Выполнить инструкцию учебного материала
 
 ## Tutorial
 Создание переменных среды и установка их значений
 ```sh
-#Создание переменных среды и установка их значений
-$ export GITHUB_USERNAME=Gnole 
-$ export GITHUB_EMAIL=olegbouchin@gmail.com 
-$ export GITHUB_TOKEN=*******************************
-#Cвязывание команды edit с вызовом текстового редактора Atom
-
+$ export GITHUB_USERNAME=<имя_пользователя>
 ```
-Начало работы в каталоге `workspace`
+Начало работы в каталоге workspace
 ```sh
 # Переход в  рабочую директорию
 $ cd ${GITHUB_USERNAME}/workspace
-# Выполнение скрипта добавляющего Node.js в PATH
+$ pushd . # Сохранение текущего каталога в стек
+# Cвязывание команды edit с вызовом текстового редактора Atom
 $ source scripts/activate
 ```
-Создание директории `~/.config` с настройками конфигурации Git
+Настройка локального репозитория для работы
 ```sh
-$ mkdir ~/.config
-#Создание файла hub с настройками конфигурации Git
-$ cat > ~/.config/hub <<EOF
-github.com:
-- user: ${GITHUB_USERNAME}
-  oauth_token: ${GITHUB_TOKEN}
-  protocol: https
-EOF
-# Установка конфигурации работы по протоколу  https утилиты hub  
-$ git config --global hub.protocol https
+# Клонируем предыдущую ЛР2
+$ git clone https://github.com/${GITHUB_USERNAME}/lab02.git projects/lab03
+$ cd projects/lab03
+$ git remote remove  origin # Разрываем прошлую связь с удаленным репозиторием с ЛР2
+# Подключение локального репозитория к удаленному репозиторию с ЛР3
+$ git remote add origin https://github.com/${GITHUB_USERNAME}/lab03.git
+```
+Ручная компиляция и сборка программ на С++
+```sh
+# Компилируем обьектный файл из файла print.cpp по стандарту С++20 с указанием,
+# где искать заголовочные файлы
+$ g++ -std=c++2a -I./include -c sources/print.cpp
+$ ls print. # Проверка существования объектного файла
+# Печать таблицы имен объектного файла, содержащих в тексте комбинацию print
+$ nm print.o | grep print
+# Создаем из объектного файла файл статической библиотеки
+$ ar rvs print.a print.o
+# Смотрим тип созданного архива
+$ file print.a
+# Компилируем обьектный файл из файла example1.cpp по стандарту С++20 с указанием,
+# где искать заголовочные файлы
+$ g++ -std=c++2a -I./include -c examples/example1.cpp
+$ ls example1.o # Проверка существования объектного файла
+# Линковка объектного файла с файлом статической библиотеки в исполняемый файл
+$ g++ example1.o print.a -o example1
+# Запуск и вывод результата в окно терминала
+$ ./example1 && echo
 ```
 
 ```sh
-$ mkdir projects/lab02 && cd projects/lab02
-# Создание локального git-репозитория (подведение существующего каталога под версионный контроль)
-$ git init
-Initialized empty Git repository in /Users/evgengrmit/Evgengrmit/workspace/projects/lab02/.git/
-# Указание пользовательских настроек: адреса почты , имени пользователя
-$ git config --global user.name ${GITHUB_USERNAME}
-$ git config --global user.email ${GITHUB_EMAIL}
-# Проверка настроек
-$ git config -e --global
-# # Подключение локального репозитория к удаленному серверу
-$ git remote add origin https://github.com/${GITHUB_USERNAME}/lab02.git
-# Объединение изменений, присутствующих в удаленном репозитории, в локальный рабочий каталог
-$ git pull origin master
- # Создание пустого файла README.md
-$ touch README.md
-# Cписок изменений в каталоге
-$ git status
-#  Добавление файла README.md в отслеживаемые
-$ git add README.md
-# Фиксация изменений в локальном репозитории (коммит)
-$ git commit -m"added README.md"
-# Помещение изменений в главную ветку удаленного хранилища, связанного с рабочим каталогом
-$ git push origin master
+# Компилируем обьектный файл из файла example2.cpp по стандарту С++20 с указанием,
+# где искать заголовочные файлы
+$ g++ -std=c++2a -I./include -c examples/example2.cpp
+# Вывод информации о бинарном файле
+$ nm example2.o
+# Линковка объектного файла с файлом статической библиотеки в исполняемый файл
+$ g++ example2.o print.a -o example2
+# Запуск программы и запись результата в файл log.txt
+$ ./example2
+$ cat log.txt && echo
 ```
-
-Добавить на сервисе **GitHub** в репозитории **lab02** файл **.gitignore**
-со следующем содержимом:
-
+Удаление всех созданных в процессе работы файлов
 ```sh
-*build*/
-*install*/
-*.swp
-.idea/
+$ rm -rf example1.o example2.o print.o
+$ rm -rf print.a
+$ rm -rf example1 example2
+$ rm -rf log.txt
 ```
-Работа с локальным репозиторием
+Создание файла `CMakeLists.txt` для автоматизированной сборки проекта
 ```sh
-# Объединение изменений, присутствующих в удаленном репозитории, в локальный рабочий каталог
-$ git pull origin master
-# Cписок коммитов
-$ git log
-```
-Работа в локальном репозитории - написание программы на C++
-```sh
-$ mkdir sources
-$ mkdir include
-$ mkdir examples
-$ cat > sources/print.cpp <<EOF
-#include <print.hpp>
-
-void print(const std::string& text, std::ostream& out)
-{
-  out << text;
-}
-
-void print(const std::string& text, std::ofstream& out)
-{
-  out << text;
-}
+# Устанавливаем минимальную версию CMake и название проекта
+$ cat > CMakeLists.txt <<EOF
+cmake_minimum_required(VERSION 3.4)
+project(print)
 EOF
 ```
-
+Устанавливаем стандарт языка и делаем его обязательным
 ```sh
-$ cat > include/print.hpp <<EOF
-#include <fstream>
-#include <iostream>
-#include <string>
+$ cat >> CMakeLists.txt <<EOF
 
-void print(const std::string& text, std::ofstream& out);
-void print(const std::string& text, std::ostream& out = std::cout);
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 EOF
 ```
-
+Сборка статической библиотеки с именем _print_ и исходником `print.cpp`
 ```sh
-$ cat > examples/example1.cpp <<EOF
-#include <print.hpp>
+$ cat >> CMakeLists.txt <<EOF
 
-int main(int argc, char** argv)
-{
-  print("hello");
-}
+add_library(print STATIC \${CMAKE_CURRENT_SOURCE_DIR}/sources/print.cpp)
 EOF
 ```
-
+Добавление директори с хэдерами и указание, где искать заголовочные файлы
 ```sh
-$ cat > examples/example2.cpp <<EOF
-#include <print.hpp>
+$ cat >> CMakeLists.txt <<EOF
 
-#include <fstream>
-
-int main(int argc, char** argv)
-{
-  std::ofstream file("log.txt");
-  print(std::string("hello"), file);
-}
+include_directories(\${CMAKE_CURRENT_SOURCE_DIR}/include)
 EOF
 ```
-Заполнение файла README.md
+Создание директории, которую CMake будет использовать в качестве корневого каталога сборки и указание каталога, где искать исходные файлы для проекта и последущая сборка
 ```sh
-$ edit README.md
+$ cmake -H. -B_build
+$ cmake --build _build
 ```
-Публикация новых файлов на удаленном сервере
+Добавление исполняемых файлов в соответствующие исходные проекты
 ```sh
-$ git status
-# Подвести все файлы в каталоге под версионный контроль
-$ git add .
-$ git commit -m"added sources"
+$ cat >> CMakeLists.txt <<EOF
+
+add_executable(example1 \${CMAKE_CURRENT_SOURCE_DIR}/examples/example1.cpp)
+add_executable(example2 \${CMAKE_CURRENT_SOURCE_DIR}/examples/example2.cpp)
+EOF
+```
+Линковка исполняемых файлов со статической библиотекой
+```sh
+$ cat >> CMakeLists.txt <<EOF
+
+target_link_libraries(example1 print)
+target_link_libraries(example2 print)
+EOF
+```
+Сборка проекта с помощью CMake в директории `_build`
+```sh
+$ cmake --build _build # Сборка всего проекта
+$ cmake --build _build --target print # Сборка только статической библиотеки
+$ cmake --build _build --target example1 # Сборка example1
+$ cmake --build _build --target example2 # Сборка example2
+```
+Запуск исполняемых файлов example1 и example2
+```sh
+$ ls -la _build/libprint.a # Проверка существования файла libprint.a и вывод информации о нём
+$ _build/example1 && echo # Запуск example1 и вывод результата работы на экран
+hello
+$ _build/example2 # Запуск исполяемого файла (вывод сообщения в файл log.txt)
+$ cat log.txt && echo # Отображение результата работы 
+hello
+$ rm -rf log.txt
+```
+Работа с файлом CMakeLists.txt из удаленного репозитория
+```sh
+$ git clone https://github.com/tp-labs/lab03 tmp # Клонирование удаленного репозитория в директорию
+$ mv -f tmp/CMakeLists.txt . # Перемещение файла CMakeLists.txt в текущий каталог
+$ rm -rf tmp # Удаление каталога tmp
+```
+Компилируем статическую библиотеку в подкаталог `_install`
+```sh
+$ cat CMakeLists.txt # Просмотр содержимого файла CMakeLists.txt
+# Создание директории с исполняемым файлом cmake и указание каталога установки.
+$ cmake -H. -B_build -DCMAKE_INSTALL_PREFIX=_install # Сборка файла _build в директорию install
+$ cmake --build _build --target install # Сборка файла _build в директорию install
+$ tree _install # Вывод содержимого каталога _install в виде дерева
+```
+Запись изменений в репозиторий
+```sh
+$ git add CMakeLists.txt
+$ git commit -m"added CMakeLists.txt"
 $ git push origin master
 ```
 
 ## Report
-Создание отчета по лабораторной работе
+Создание отчета по ЛР № 3
 ```sh
-$ cd ~/workspace/
-$ export LAB_NUMBER=02
-$ git clone https://github.com/tp-labs/lab${LAB_NUMBER}.git tasks/lab${LAB_NUMBER}
+$ popd
+$ export LAB_NUMBER=03
+$ git clone https://github.com/tp-labs/lab${LAB_NUMBER} tasks/lab${LAB_NUMBER}
 $ mkdir reports/lab${LAB_NUMBER}
 $ cp tasks/lab${LAB_NUMBER}/README.md reports/lab${LAB_NUMBER}/REPORT.md
 $ cd reports/lab${LAB_NUMBER}
-$ edit REPORT.md # Создание отчета
-$ gist REPORT.md # Публикация отчета
+$ edit REPORT.md
+$ gist REPORT.md
 ```
-
 ## Links
-
-- [hub](https://hub.github.com/)
-- [GitHub](https://github.com)
-- [Bitbucket](https://bitbucket.org)
-- [Gitlab](https://about.gitlab.com)
-- [LearnGitBranching](http://learngitbranching.js.org/)
+- [Основы сборки проектов на С/C++ при помощи CMake](https://eax.me/cmake/)
+- [CMake Tutorial](http://neerc.ifmo.ru/wiki/index.php?title=CMake_Tutorial)
+- [C++ Tutorial - make & CMake](https://www.bogotobogo.com/cplusplus/make.php)
+- [Autotools](http://www.gnu.org/software/automake/manual/html_node/Autotools-Introduction.html)
+- [CMake](https://cgold.readthedocs.io/en/latest/index.html)
 
 ```
 Copyright (c) 2015-2020 The ISC Authors
